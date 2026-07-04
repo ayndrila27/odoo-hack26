@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | NovaHR</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <header class="topbar">
+        <div class="topbar-brand">
+            <span class="brand-mark">N</span>
+            <span class="brand-name">NovaHR</span>
+        </div>
+        <div class="topbar-user">
+            <span class="topbar-user-name">{{ session.get('full_name', '') }}</span>
+            <span class="badge badge-role">{{ session.get('role', '')|capitalize }}</span>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm">Logout</a>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-wrap">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main class="content">
+        <h1 class="page-title">My Profile</h1>
+
+        <div class="profile-layout">
+
+            <!-- Left: picture + quick facts -->
+            <div class="card profile-side-card">
+                <img class="avatar avatar-xl"
+                     src="{{ url_for('static', filename='uploads/' ~ (user.profile_pic or 'default.png')) }}"
+                     alt="Profile picture">
+
+                <h3 class="profile-side-name">{{ user.full_name }}</h3>
+                <p class="profile-side-role">{{ user.designation or 'Employee' }}</p>
+                <span class="badge badge-role">{{ user.role|capitalize }}</span>
+
+                <form action="{{ url_for('profile.upload_picture') }}" method="POST"
+                      enctype="multipart/form-data" class="upload-form">
+                    <label for="profile_pic" class="btn btn-secondary btn-block file-label">
+                        Change Profile Photo
+                    </label>
+                    <input type="file" id="profile_pic" name="profile_pic" accept="image/*"
+                           class="file-input" onchange="this.form.submit()">
+                </form>
+                {% if user.profile_pic != "default.png" %}
+                <form action="{{ url_for('profile.remove_picture') }}" method="POST">
+                   <button type="submit" class="btn btn-danger btn-block">
+                      Remove Profile Photo
+                   </button>
+                </form>
+                {% endif %}
+            </div>
+
+            <!-- Right: details -->
+            <div class="card profile-detail-card">
+                <div class="card-header">
+                    <h3>Personal Information</h3>
+                    <a href="{{ url_for('profile.edit_profile') }}" class="btn btn-outline">Edit</a>
+                </div>
+
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Employee ID</span>
+                        <span class="detail-value">{{ user.employee_id }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Full Name</span>
+                        <span class="detail-value">{{ user.full_name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value">{{ user.email }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Department</span>
+                        <span class="detail-value">{{ user.department or '—' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Designation</span>
+                        <span class="detail-value">{{ user.designation or '—' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Phone Number</span>
+                        <span class="detail-value">{{ user.phone or 'Not provided' }}</span>
+                    </div>
+                    <div class="detail-item detail-item-wide">
+                        <span class="detail-label">Address</span>
+                        <span class="detail-value">{{ user.address or 'Not provided' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Date Joined</span>
+                        <span class="detail-value">{{ user.date_joined.strftime('%d %b %Y') }}</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

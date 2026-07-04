@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | NovaHR</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-body">
+
+    <div class="auth-wrap">
+        <div class="auth-panel">
+            <div class="auth-brand">
+                <span class="brand-mark">N</span>
+                <span class="brand-name">NovaHR</span>
+            </div>
+
+            <h1 class="auth-headline">Join your workplace<br>on NovaHR.</h1>
+            <p class="auth-subtext">
+                Create your account as an Employee or HR admin.
+                It only takes a minute to get started.
+            </p>
+
+            <div class="auth-stats">
+                <div class="auth-stat">
+                    <strong>Secure</strong>
+                    <span>Hashed passwords</span>
+                </div>
+                <div class="auth-stat">
+                    <strong>Instant</strong>
+                    <span>Self sign-up</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-form-panel">
+            <div class="auth-form-card auth-form-card-wide">
+                <h2 class="form-title">Create your account</h2>
+                <p class="form-subtitle">Fill in your details below to get started.</p>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-wrap">
+                            {% for category, message in messages %}
+                                <div class="flash flash-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('auth.signup') }}" class="auth-form">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="full_name">Full name</label>
+                            <input class="form-input" type="text" id="full_name" name="full_name"
+                                   value="{{ form.get('full_name', '') }}" placeholder="Jordan Lee" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email address</label>
+                            <input class="form-input" type="email" id="email" name="email"
+                                   value="{{ form.get('email', '') }}" placeholder="you@company.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="department">Department</label>
+                            <input class="form-input" type="text" id="department" name="department"
+                                   value="{{ form.get('department', '') }}" placeholder="e.g. Engineering">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="designation">Designation</label>
+                            <input class="form-input" type="text" id="designation" name="designation"
+                                   value="{{ form.get('designation', '') }}" placeholder="e.g. Software Intern">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="password">Password</label>
+                            <input class="form-input" type="password" id="password" name="password"
+                                   placeholder="Min. 6 characters" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="confirm_password">Confirm password</label>
+                            <input class="form-input" type="password" id="confirm_password" name="confirm_password"
+                                   placeholder="Re-enter password" required>
+                        </div>
+                    </div>
+
+                    <label class="form-label">I am signing up as</label>
+                    <div class="role-select">
+                        <label class="role-card">
+                            <input type="radio" name="role" value="employee"
+                                   {% if form.get('role', 'employee') == 'employee' %}checked{% endif %}>
+                            <span class="role-card-title">Employee</span>
+                            <span class="role-card-desc">Manage your profile and personal details.</span>
+                        </label>
+                        <label class="role-card">
+                            <input type="radio" name="role" value="hr"
+                                   {% if form.get('role') == 'hr' %}checked{% endif %}>
+                            <span class="role-card-title">HR</span>
+                            <span class="role-card-desc">Oversee employees and manage records.</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                </form>
+
+                <p class="auth-switch">
+                    Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

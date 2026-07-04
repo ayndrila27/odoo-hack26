@@ -1,19 +1,332 @@
-.badge-present { background-color: #198754; }
-.badge-absent { background-color: #dc3545; }
-.badge-half-day { background-color: #fd7e14; }
-.badge-leave { background-color: #6c757d; }
-.badge-pending { background-color: #ffc107; color: #000; }
-.badge-approved { background-color: #198754; }
-.badge-rejected { background-color: #dc3545; }
+/* =========================================================
+   NovaHR — Design tokens
+   ========================================================= */
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-soft: #eff6ff;
+    --navy: #0f172a;
+    --ink: #1e293b;
+    --gray: #64748b;
+    --gray-light: #e2e8f0;
+    --bg: #f4f6fb;
+    --white: #ffffff;
+    --success: #16a34a;
+    --success-soft: #dcfce7;
+    --danger: #dc2626;
+    --danger-soft: #fee2e2;
 
-.status-card {
-  border-radius: 14px;
-  transition: transform .15s ease;
-}
-.status-card:hover {
-  transform: translateY(-2px);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 20px 40px rgba(37, 99, 235, 0.12);
 }
 
-.flatpickr-calendar {
-  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    color: var(--navy);
+}
+
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; }
+
+/* =========================================================
+   Buttons
+   ========================================================= */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.btn-block { width: 100%; }
+.btn-sm { padding: 7px 14px; font-size: 13px; }
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--white);
+    box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+}
+.btn-secondary:hover { background: #dbeafe; }
+
+.btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--gray-light);
+    color: var(--ink);
+}
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+/* =========================================================
+   Top bar (profile / edit-profile pages)
+   ========================================================= */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 36px;
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.topbar-brand { display: flex; align-items: center; gap: 10px; }
+
+.brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Poppins", sans-serif;
+    font-weight: 700;
+}
+
+.brand-name {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--navy);
+}
+
+.topbar-user { display: flex; align-items: center; gap: 12px; }
+.topbar-user-name { font-weight: 600; font-size: 14px; }
+
+.badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+.badge-role { background: var(--primary-soft); color: var(--primary-dark); }
+
+.content { padding: 32px 36px 48px; max-width: 1100px; margin: 0 auto; }
+.page-title { font-size: 24px; margin-bottom: 22px; }
+
+/* =========================================================
+   Flash messages
+   ========================================================= */
+.flash-wrap { padding: 16px 36px 0; display: flex; flex-direction: column; gap: 8px; max-width: 1100px; margin: 0 auto; }
+.auth-form-card .flash-wrap { padding: 0; margin-bottom: 16px; max-width: none; }
+
+.flash {
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+}
+.flash-success { background: var(--success-soft); color: var(--success); }
+.flash-error { background: var(--danger-soft); color: var(--danger); }
+
+/* =========================================================
+   Cards
+   ========================================================= */
+.card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(15, 23, 42, 0.04);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.card-note { color: var(--gray); font-size: 12.5px; margin: 0 0 18px; }
+
+/* =========================================================
+   Profile page
+   ========================================================= */
+.profile-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.profile-side-card { text-align: center; }
+.profile-side-name { font-size: 17px; margin-top: 4px; }
+.profile-side-role { color: var(--gray); font-size: 13px; margin: 4px 0 12px; }
+
+.avatar {
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-soft);
+    background: var(--gray-light);
+}
+.avatar-xl { width: 110px; height: 110px; margin-bottom: 16px; }
+
+.upload-form { margin-top: 20px; }
+.file-input { display: none; }
+.file-label { display: block; }
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 24px;
+}
+.detail-item-wide { grid-column: 1 / -1; }
+.detail-label { display: block; font-size: 12px; color: var(--gray); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+.detail-value { display: block; font-size: 14.5px; font-weight: 500; color: var(--ink); }
+
+/* =========================================================
+   Forms (shared)
+   ========================================================= */
+.form-card { max-width: 620px; }
+
+.auth-form { display: flex; flex-direction: column; gap: 6px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { display: flex; flex-direction: column; }
+
+.form-label { font-size: 13px; font-weight: 600; color: var(--ink); margin: 14px 0 6px; }
+.form-input {
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--gray-light);
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--white);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+}
+.form-textarea { resize: vertical; min-height: 90px; }
+
+.form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 22px; }
+
+/* Role selection cards */
+.role-select { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 6px; }
+.role-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1.5px solid var(--gray-light);
+    border-radius: var(--radius-md);
+    padding: 14px 16px 14px 40px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.role-card input[type="radio"] {
+    position: absolute;
+    left: 14px;
+    top: 16px;
+    accent-color: var(--primary);
+    width: 16px;
+    height: 16px;
+}
+.role-card:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
+.role-card-title { font-weight: 600; font-size: 14px; }
+.role-card-desc { font-size: 12.5px; color: var(--gray); }
+
+/* =========================================================
+   Auth pages (login / signup) — split screen
+   ========================================================= */
+.auth-body { margin: 0; background: var(--bg); }
+
+.auth-wrap {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.auth-panel {
+    background: linear-gradient(155deg, var(--navy) 0%, #1e3a8a 100%);
+    color: var(--white);
+    padding: 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+}
+
+.auth-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.auth-brand .brand-name { color: var(--white); font-size: 18px; }
+
+.auth-headline {
+    font-size: 34px;
+    line-height: 1.25;
+    font-weight: 600;
+    max-width: 420px;
+}
+
+.auth-subtext { color: #cbd5e1; font-size: 15px; max-width: 400px; line-height: 1.6; }
+
+.auth-stats { display: flex; gap: 32px; margin-top: 20px; }
+.auth-stat { display: flex; flex-direction: column; }
+.auth-stat strong { font-family: "Poppins", sans-serif; font-size: 20px; }
+.auth-stat span { font-size: 12.5px; color: #94a3b8; }
+
+.auth-form-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: var(--white);
+}
+
+.auth-form-card { width: 100%; max-width: 380px; }
+.auth-form-card-wide { max-width: 520px; }
+
+.form-title { font-size: 24px; margin-bottom: 6px; }
+.form-subtitle { color: var(--gray); font-size: 14px; margin: 0 0 22px; }
+
+.auth-switch { text-align: center; margin-top: 22px; font-size: 13.5px; color: var(--gray); }
+.auth-switch a { color: var(--primary); font-weight: 600; }
+
+.auth-form .btn-block { margin-top: 18px; }
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width: 1024px) {
+    .auth-panel { display: none; }
+    .auth-wrap { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+    .topbar { padding: 14px 20px; flex-wrap: wrap; gap: 10px; }
+    .content { padding: 20px; }
+    .flash-wrap { padding: 16px 20px 0; }
+    .profile-layout { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .role-select { grid-template-columns: 1fr; }
+    .detail-grid { grid-template-columns: 1fr; }
 }

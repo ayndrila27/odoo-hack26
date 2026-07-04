@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | NovaHR</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-body">
+
+    <div class="auth-wrap">
+        <div class="auth-panel">
+            <div class="auth-brand">
+                <span class="brand-mark">N</span>
+                <span class="brand-name">NovaHR</span>
+            </div>
+
+            <h1 class="auth-headline">Manage your workday,<br>all in one place.</h1>
+            <p class="auth-subtext">
+                Sign in to view your profile, keep your contact details up
+                to date, and manage your account.
+            </p>
+
+            <div class="auth-stats">
+                <div class="auth-stat">
+                    <strong>2</strong>
+                    <span>Roles supported</span>
+                </div>
+                <div class="auth-stat">
+                    <strong>100%</strong>
+                    <span>Self-service</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-form-panel">
+            <div class="auth-form-card">
+                <h2 class="form-title">Welcome back</h2>
+                <p class="form-subtitle">Log in to access your HR dashboard.</p>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-wrap">
+                            {% for category, message in messages %}
+                                <div class="flash flash-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form">
+                    <label class="form-label" for="email">Email address</label>
+                    <input class="form-input" type="email" id="email" name="email"
+                           value="{{ email }}" placeholder="you@company.com" required>
+
+                    <label class="form-label" for="password">Password</label>
+                    <input class="form-input" type="password" id="password" name="password"
+                           placeholder="••••••••" required>
+
+                    <button type="submit" class="btn btn-primary btn-block">Log In</button>
+                </form>
+
+                <p class="auth-switch">
+                    Don't have an account? <a href="{{ url_for('auth.signup') }}">Sign up</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
