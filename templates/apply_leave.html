@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Apply for Leave{% endblock %}
+
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-envelope-paper"></i> Apply for Leave</h3>
+
+<div class="card shadow-sm" style="max-width: 600px;">
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('attendance_leave.apply_leave') }}">
+      <div class="mb-3">
+        <label class="form-label">Leave Type</label>
+        <select name="leave_type" class="form-select" required>
+          <option value="" disabled selected>Select leave type</option>
+          <option value="Paid">Paid</option>
+          <option value="Sick">Sick</option>
+          <option value="Unpaid">Unpaid</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Select Date Range (calendar)</label>
+        <input type="text" id="dateRange" class="form-control" placeholder="Click to pick dates" autocomplete="off" required>
+        <input type="hidden" name="start_date" id="start_date">
+        <input type="hidden" name="end_date" id="end_date">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Remarks</label>
+        <textarea name="remarks" class="form-control" rows="3" placeholder="Reason for leave (optional)"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="bi bi-send"></i> Submit Leave Request
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+  flatpickr("#dateRange", {
+    mode: "range",
+    dateFormat: "Y-m-d",
+    minDate: "today",
+    onClose: function(selectedDates) {
+      if (selectedDates.length === 2) {
+        document.getElementById("start_date").value = selectedDates[0].toISOString().slice(0,10);
+        document.getElementById("end_date").value = selectedDates[1].toISOString().slice(0,10);
+      } else if (selectedDates.length === 1) {
+        // single day leave
+        var d = selectedDates[0].toISOString().slice(0,10);
+        document.getElementById("start_date").value = d;
+        document.getElementById("end_date").value = d;
+      }
+    }
+  });
+</script>
+{% endblock %}

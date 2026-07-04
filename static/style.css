@@ -1,0 +1,19 @@
+.badge-present { background-color: #198754; }
+.badge-absent { background-color: #dc3545; }
+.badge-half-day { background-color: #fd7e14; }
+.badge-leave { background-color: #6c757d; }
+.badge-pending { background-color: #ffc107; color: #000; }
+.badge-approved { background-color: #198754; }
+.badge-rejected { background-color: #dc3545; }
+
+.status-card {
+  border-radius: 14px;
+  transition: transform .15s ease;
+}
+.status-card:hover {
+  transform: translateY(-2px);
+}
+
+.flatpickr-calendar {
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
