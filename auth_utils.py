@@ -15,6 +15,17 @@ def login_required(view_func):
         if "user_id" not in session:
             flash("Please log in to continue.", "error")
             return redirect(url_for("auth.login"))
+
+        # The session can outlive the actual user row (e.g. the account was
+        # removed, or the dev database was reset while a browser still had
+        # an old login cookie). Without this check, get_current_user()
+        # silently returns None and every route that does user.id crashes
+        # with AttributeError: 'NoneType' object has no attribute 'id'.
+        if get_current_user() is None:
+            session.clear()
+            flash("Your session has expired. Please log in again.", "error")
+            return redirect(url_for("auth.login"))
+
         return view_func(*args, **kwargs)
 
     return wrapped

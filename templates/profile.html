@@ -1,6 +1,24 @@
 {% extends "base.html" %}
+{% import "_ui.html" as ui %}
 {% block title %}Profile — NovaHR{% endblock %}
 {% block content %}
+
+<div class="hero">
+  <div class="hero-row">
+    <div class="hero-avatar">
+      {{ ui.avatar(user, 'lg') }}
+      <div>
+        <span class="eyebrow">Welcome back</span>
+        <h1>{{ user.full_name.split(' ')[0] }}</h1>
+        <span class="desc">{{ user.designation or 'Team member' }}{% if user.department %} · {{ user.department }}{% endif %}</span>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="v mono">{{ user.employee_id }}</div><div class="l">Employee ID</div></div>
+      <div class="hero-stat"><div class="v mono">{{ user.date_joined.strftime('%b %Y') if user.date_joined else '—' }}</div><div class="l">Joined</div></div>
+    </div>
+  </div>
+</div>
 
 <div class="page-head">
   <span class="eyebrow">Profile</span>
@@ -10,7 +28,7 @@
 
 <div class="card">
   <div class="profile-head">
-    <img class="avatar avatar-lg" src="{{ url_for('static', filename='uploads/' + (user.profile_pic or 'default.png')) }}" alt="{{ user.full_name }}">
+    {{ ui.avatar(user, 'lg') }}
     <div class="names">
       <h2>{{ user.full_name }}</h2>
       <div class="id mono">{{ user.employee_id }}</div>
@@ -40,7 +58,7 @@
     <h2>Profile photo</h2>
   </div>
   <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
-    <img class="avatar avatar-md" src="{{ url_for('static', filename='uploads/' + (user.profile_pic or 'default.png')) }}" alt="">
+    {{ ui.avatar(user, 'md') }}
     <form method="POST" action="{{ url_for('profile.upload_picture') }}" enctype="multipart/form-data" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
       <input type="file" name="profile_pic" accept=".png,.jpg,.jpeg,.gif" required>
       <button type="submit" class="btn btn-accent btn-sm">Upload new photo</button>

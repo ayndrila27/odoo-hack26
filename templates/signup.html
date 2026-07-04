@@ -4,6 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sign up — NovaHR</title>
+  <script>
+    (function(){
+      var saved = localStorage.getItem('novahr-theme');
+      if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    })();
+  </script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -11,6 +17,15 @@
     <div class="auth-visual">
       <div class="brand"><span class="dot"></span> NovaHR</div>
       <div class="tagline">Every workday,<br><em>perfectly aligned.</em></div>
+
+      <div class="auth-preview">
+        <div class="ap-head"><span>This week</span><span class="ap-pill">Live</span></div>
+        <div class="ap-row"><span class="ap-l">Mon</span><div class="ap-track"><div class="ap-fill" style="width:92%;"></div></div><span class="ap-v">92%</span></div>
+        <div class="ap-row"><span class="ap-l">Tue</span><div class="ap-track"><div class="ap-fill" style="width:88%;"></div></div><span class="ap-v">88%</span></div>
+        <div class="ap-row"><span class="ap-l">Wed</span><div class="ap-track"><div class="ap-fill" style="width:95%;"></div></div><span class="ap-v">95%</span></div>
+        <div class="ap-row"><span class="ap-l">Thu</span><div class="ap-track"><div class="ap-fill" style="width:80%;"></div></div><span class="ap-v">80%</span></div>
+      </div>
+
       <div class="foot">
         <span><strong>01</strong> Attendance</span>
         <span><strong>02</strong> Leave</span>
@@ -84,5 +99,19 @@
       </div>
     </div>
   </div>
+  <script>
+    (function(){
+      var toasts = document.querySelectorAll('.flash-stack .flash');
+      toasts.forEach(function(toast, i){
+        function dismiss(){
+          if (toast.classList.contains('is-leaving')) return;
+          toast.classList.add('is-leaving');
+          setTimeout(function(){ toast.remove(); }, 200);
+        }
+        toast.addEventListener('click', dismiss);
+        setTimeout(dismiss, 4500 + i * 300);
+      });
+    })();
+  </script>
 </body>
 </html>

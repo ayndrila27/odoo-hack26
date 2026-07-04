@@ -1,18 +1,9 @@
 """
-Attendance & Leave Module  (Teammate 2)
-----------------------------------------
-Self-contained Flask Blueprint. Register it on the main app with:
+Attendance & Leave Module (Teammate 2)
 
-    from attendance_leave import attendance_leave_bp
-    app.register_blueprint(attendance_leave_bp)
-
-Assumes:
-  - session['employee_id'] is already set by the Auth module (Teammate 1)
-    after a successful login.
-  - session['employee_name'] (optional) for display purposes.
-
-If those keys aren't in session, routes redirect to '/login' (Teammate 1's route name -
-change AUTH_LOGIN_ENDPOINT below if theirs is named differently).
+Plugs into the shared session-based auth from auth_routes.py /
+auth_utils.py: session['user_id'] is set on login, and login_required
+here mirrors auth_utils.login_required (redirects to auth.login).
 """
 
 from flask import (
@@ -23,26 +14,18 @@ from datetime import datetime, date, timedelta
 from functools import wraps
 from models import db, Attendance, Leave
 
-attendance_leave_bp = Blueprint(
-    "attendance_leave", __name__,
+attendance_bp = Blueprint(
+    "attendance", __name__,
     template_folder="templates",
-    static_folder="static"
 )
-
-# Change this if Teammate 1 names their login route differently
-AUTH_LOGIN_ENDPOINT = "login"
 
 
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if "employee_id" not in session:
-            flash("Please log in first.", "warning")
-            try:
-                return redirect(url_for(AUTH_LOGIN_ENDPOINT))
-            except Exception:
-                # Fallback if auth blueprint isn't wired up yet (for solo testing)
-                return redirect("/login")
+        if "user_id" not in session:
+            flash("Please log in first.", "error")
+            return redirect(url_for("auth.login"))
         return f(*args, **kwargs)
     return wrapper
 
@@ -59,77 +42,75 @@ def get_week_range(anchor=None):
 # CHECK-IN / CHECK-OUT
 # ---------------------------------------------------------------
 
-@attendance_leave_bp.route("/attendance/checkin", methods=["POST"])
+@attendance_bp.route("/attendance/checkin", methods=["POST"])
 @login_required
 def check_in():
-    emp_id = session["employee_id"]
+    user_id = session["user_id"]
     today = date.today()
 
-    record = Attendance.query.filter_by(employee_id=emp_id, date=today).first()
+    record = Attendance.query.filter_by(user_id=user_id, date=today).first()
     if record and record.check_in:
         flash("You have already checked in today.", "info")
-        return redirect(url_for("attendance_leave.attendance_daily"))
+        return redirect(url_for("attendance.attendance_daily"))
 
     if not record:
-        record = Attendance(employee_id=emp_id, date=today)
+        record = Attendance(user_id=user_id, date=today)
         db.session.add(record)
 
     record.check_in = datetime.now()
     record.status = "Present"
     db.session.commit()
     flash(f"Checked in at {record.check_in.strftime('%H:%M:%S')}", "success")
-    return redirect(url_for("attendance_leave.attendance_daily"))
+    return redirect(url_for("attendance.attendance_daily"))
 
 
-@attendance_leave_bp.route("/attendance/checkout", methods=["POST"])
+@attendance_bp.route("/attendance/checkout", methods=["POST"])
 @login_required
 def check_out():
-    emp_id = session["employee_id"]
+    user_id = session["user_id"]
     today = date.today()
 
-    record = Attendance.query.filter_by(employee_id=emp_id, date=today).first()
+    record = Attendance.query.filter_by(user_id=user_id, date=today).first()
     if not record or not record.check_in:
-        flash("You need to check in before checking out.", "warning")
-        return redirect(url_for("attendance_leave.attendance_daily"))
+        flash("You need to check in before checking out.", "error")
+        return redirect(url_for("attendance.attendance_daily"))
 
     if record.check_out:
         flash("You have already checked out today.", "info")
-        return redirect(url_for("attendance_leave.attendance_daily"))
+        return redirect(url_for("attendance.attendance_daily"))
 
     record.check_out = datetime.now()
-
-    # Mark Half-day if worked less than 4 hours, else Present
     worked_hours = (record.check_out - record.check_in).total_seconds() / 3600
     record.status = "Half-day" if worked_hours < 4 else "Present"
 
     db.session.commit()
     flash(f"Checked out at {record.check_out.strftime('%H:%M:%S')}", "success")
-    return redirect(url_for("attendance_leave.attendance_daily"))
+    return redirect(url_for("attendance.attendance_daily"))
 
 
 # ---------------------------------------------------------------
 # ATTENDANCE VIEWS
 # ---------------------------------------------------------------
 
-@attendance_leave_bp.route("/attendance/daily")
+@attendance_bp.route("/attendance/daily")
 @login_required
 def attendance_daily():
-    emp_id = session["employee_id"]
+    user_id = session["user_id"]
     today = date.today()
-    record = Attendance.query.filter_by(employee_id=emp_id, date=today).first()
+    record = Attendance.query.filter_by(user_id=user_id, date=today).first()
     return render_template("attendance_daily.html", record=record, today=today)
 
 
-@attendance_leave_bp.route("/attendance/weekly")
+@attendance_bp.route("/attendance/weekly")
 @login_required
 def attendance_weekly():
-    emp_id = session["employee_id"]
-    offset = int(request.args.get("offset", 0))  # 0 = this week, -1 = last week, etc.
+    user_id = session["user_id"]
+    offset = int(request.args.get("offset", 0))
     anchor = date.today() + timedelta(weeks=offset)
     monday, sunday = get_week_range(anchor)
 
     records = Attendance.query.filter(
-        Attendance.employee_id == emp_id,
+        Attendance.user_id == user_id,
         Attendance.date >= monday,
         Attendance.date <= sunday
     ).order_by(Attendance.date).all()
@@ -153,14 +134,13 @@ def attendance_weekly():
     )
 
 
-@attendance_leave_bp.route("/attendance/history")
+@attendance_bp.route("/attendance/history")
 @login_required
 def attendance_history():
-    emp_id = session["employee_id"]
-    records = Attendance.query.filter_by(employee_id=emp_id) \
+    user_id = session["user_id"]
+    records = Attendance.query.filter_by(user_id=user_id) \
         .order_by(Attendance.date.desc()).all()
 
-    # Simple monthly present/absent counts for a quick summary
     total_present = sum(1 for r in records if r.status in ("Present", "Half-day"))
     total_absent = sum(1 for r in records if r.status == "Absent")
     total_leave = sum(1 for r in records if r.status == "Leave")
@@ -175,11 +155,11 @@ def attendance_history():
 # LEAVE MANAGEMENT
 # ---------------------------------------------------------------
 
-@attendance_leave_bp.route("/leave/apply", methods=["GET", "POST"])
+@attendance_bp.route("/leave/apply", methods=["GET", "POST"])
 @login_required
 def apply_leave():
     if request.method == "POST":
-        emp_id = session["employee_id"]
+        user_id = session["user_id"]
         leave_type = request.form.get("leave_type")
         start_date_str = request.form.get("start_date")
         end_date_str = request.form.get("end_date")
@@ -200,11 +180,11 @@ def apply_leave():
 
         if errors:
             for e in errors:
-                flash(e, "danger")
+                flash(e, "error")
             return render_template("apply_leave.html")
 
         new_leave = Leave(
-            employee_id=emp_id,
+            user_id=user_id,
             leave_type=leave_type,
             start_date=start_dt,
             end_date=end_dt,
@@ -214,36 +194,35 @@ def apply_leave():
         db.session.add(new_leave)
         db.session.commit()
         flash("Leave request submitted successfully.", "success")
-        return redirect(url_for("attendance_leave.leave_status"))
+        return redirect(url_for("attendance.leave_status"))
 
     return render_template("apply_leave.html")
 
 
-@attendance_leave_bp.route("/leave/status")
+@attendance_bp.route("/leave/status")
 @login_required
 def leave_status():
-    emp_id = session["employee_id"]
-    leaves = Leave.query.filter_by(employee_id=emp_id) \
+    user_id = session["user_id"]
+    leaves = Leave.query.filter_by(user_id=user_id) \
         .order_by(Leave.applied_on.desc()).all()
     return render_template("leave_status.html", leaves=leaves)
 
 
 # ---------------------------------------------------------------
-# JSON APIs (handy for the calendar widget + for Teammate 3's admin views)
+# JSON APIs
 # ---------------------------------------------------------------
 
-@attendance_leave_bp.route("/api/attendance/calendar")
+@attendance_bp.route("/api/attendance/calendar")
 @login_required
 def attendance_calendar_json():
-    """Returns this employee's attendance as {date: status} for calendar highlighting."""
-    emp_id = session["employee_id"]
-    records = Attendance.query.filter_by(employee_id=emp_id).all()
+    user_id = session["user_id"]
+    records = Attendance.query.filter_by(user_id=user_id).all()
     return jsonify({r.date.isoformat(): r.status for r in records})
 
 
-@attendance_leave_bp.route("/api/leave/mine")
+@attendance_bp.route("/api/leave/mine")
 @login_required
 def my_leaves_json():
-    emp_id = session["employee_id"]
-    leaves = Leave.query.filter_by(employee_id=emp_id).all()
+    user_id = session["user_id"]
+    leaves = Leave.query.filter_by(user_id=user_id).all()
     return jsonify([l.to_dict() for l in leaves])

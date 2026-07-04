@@ -1,25 +1,82 @@
 {% extends "base.html" %}
+{% import "_ui.html" as ui %}
 {% block title %}Admin dashboard — NovaHR{% endblock %}
 {% block content %}
 
-<div class="page-head">
-  <span class="eyebrow">Admin</span>
-  <h1>Dashboard</h1>
-  <span class="desc">A snapshot of today across the organization.</span>
+<div class="hero">
+  <div class="hero-row">
+    <div class="hero-avatar">
+      {{ ui.avatar(current_user, 'lg') }}
+      <div>
+        <span class="eyebrow">Admin overview</span>
+        <h1>Every workday, at a glance</h1>
+        <span class="desc">A snapshot of attendance, leave and headcount across the organization today.</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="grid grid-3">
-  <div class="stat-card">
-    <div class="label">Total employees</div>
-    <div class="value">{{ total_employees }}</div>
+  <div class="stat-card polish">
+    <div class="stat-top">
+      <div class="stat-icon">{{ ui.icon('people') }}</div>
+    </div>
+    <div>
+      <div class="label">Total employees</div>
+      <div class="value">{{ total_employees }}</div>
+    </div>
   </div>
-  <div class="stat-card">
-    <div class="label">Pending leave requests</div>
-    <div class="value">{{ pending_leaves }}</div>
+  <div class="stat-card polish">
+    <div class="stat-top">
+      <div class="stat-icon">{{ ui.icon('inbox') }}</div>
+    </div>
+    <div>
+      <div class="label">Pending leave requests</div>
+      <div class="value">{{ pending_leaves }}</div>
+    </div>
   </div>
-  <div class="stat-card">
-    <div class="label">Present today</div>
-    <div class="value">{{ today_present }}</div>
+  <div class="stat-card polish teal-accent">
+    <div class="stat-top">
+      <div class="stat-icon">{{ ui.icon('clock') }}</div>
+    </div>
+    <div>
+      <div class="label">Present today</div>
+      <div class="value">{{ today_present }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="two-col" style="margin-top:18px;">
+  <div class="card">
+    <div class="card-head">
+      <h2>Attendance — last 7 days</h2>
+      <span class="muted">% of workforce present</span>
+    </div>
+    <div class="bar-chart">
+      {% for d in weekly_attendance %}
+      <div class="bar-row">
+        <span class="b-label">{{ d.label }}</span>
+        <div class="bar-track"><div class="bar-fill" style="width: {{ d.pct }}%;"></div></div>
+        <span class="b-value">{{ d.count }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Leave requests</h2>
+      <span class="muted">By status</span>
+    </div>
+    <div class="bar-chart">
+      {% for l in leave_breakdown %}
+      <div class="bar-row">
+        <span class="b-label">{{ l.label }}</span>
+        <div class="bar-track"><div class="bar-fill {{ l.css }}" style="width: {{ l.pct }}%;"></div></div>
+        <span class="b-value">{{ l.count }}</span>
+      </div>
+      {% endfor %}
+    </div>
   </div>
 </div>
 

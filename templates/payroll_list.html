@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% import "_ui.html" as ui %}
 {% block title %}Payroll — NovaHR{% endblock %}
 {% block content %}
 
 <div class="page-head">
   <span class="eyebrow">Admin</span>
-  <h1>Payroll — {{ month }}/{{ year }}</h1>
+  <h1>Payroll — {{ MONTH_NAMES[month] }} {{ year }}</h1>
   <span class="desc">Salary structure for every employee this month.</span>
 </div>
 
@@ -26,13 +27,20 @@
 <div class="card">
   {% if employees %}
   <table>
-    <thead><tr><th>Employee</th><th>Employee ID</th><th>Gross</th><th>Deductions</th><th>Net salary</th><th></th></tr></thead>
+    <thead><tr><th>Employee</th><th>Gross</th><th>Deductions</th><th>Net salary</th><th></th></tr></thead>
     <tbody>
       {% for e in employees %}
       {% set p = payroll_by_user.get(e.id) %}
       <tr>
-        <td>{{ e.full_name }}</td>
-        <td class="mono">{{ e.employee_id }}</td>
+        <td>
+          <div style="display:flex; align-items:center; gap:10px;">
+            {{ ui.avatar(e, 'sm') }}
+            <div>
+              <div>{{ e.full_name }}</div>
+              <div class="mono text-muted" style="font-size:11.5px;">{{ e.employee_id }}</div>
+            </div>
+          </div>
+        </td>
         <td class="mono">{{ '₹%.2f'|format(p.gross_salary) if p else '—' }}</td>
         <td class="mono">{{ '₹%.2f'|format(p.total_deductions) if p else '—' }}</td>
         <td class="mono">{{ '₹%.2f'|format(p.net_salary) if p else '—' }}</td>

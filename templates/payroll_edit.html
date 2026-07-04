@@ -57,8 +57,11 @@
     </form>
   </div>
 
-  <div class="card">
-    <div class="card-head"><h2>Payslip preview</h2></div>
+  <div class="payslip-card">
+    <div class="payslip-brand">
+      <div class="b"><span class="dot"></span>Payslip preview</div>
+      <div class="period mono">{{ MONTH_NAMES[month] }} {{ year }}</div>
+    </div>
     <div class="payslip-line"><span>Basic salary</span><span class="v">₹{{ '%.2f'|format(payroll.basic_salary) }}</span></div>
     <div class="payslip-line"><span>HRA</span><span class="v">₹{{ '%.2f'|format(payroll.hra) }}</span></div>
     <div class="payslip-line"><span>DA</span><span class="v">₹{{ '%.2f'|format(payroll.da) }}</span></div>
@@ -72,8 +75,9 @@
     <div class="payslip-line"><span>Professional tax</span><span class="v">−₹{{ '%.2f'|format(payroll.professional_tax) }}</span></div>
     <div class="payslip-line"><span>Other deduction</span><span class="v">−₹{{ '%.2f'|format(payroll.other_deduction) }}</span></div>
     <div class="payslip-line total"><span>Net salary</span><span class="v">₹{{ '%.2f'|format(payroll.net_salary) }}</span></div>
+    <div class="payslip-stub-edge"></div>
 
-    <span class="hint" style="display:block; margin-top:12px;">Totals recalculate automatically when you save.</span>
+    <span class="hint" style="display:block; margin-top:16px;">Totals recalculate automatically when you save.</span>
   </div>
 </div>
 

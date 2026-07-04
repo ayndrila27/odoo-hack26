@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_ui.html" as ui %}
 {% block title %}Employees — NovaHR{% endblock %}
 {% block content %}
 
@@ -8,16 +9,37 @@
   <span class="desc">Everyone with an account in the system.</span>
 </div>
 
+<div class="filter-bar">
+  <input type="text" id="emp-search" placeholder="Search by name or email…">
+  <select id="dept-filter">
+    <option value="">All departments</option>
+    {% for d in employees|map(attribute='department')|reject('none')|unique|sort %}
+    <option value="{{ d }}">{{ d }}</option>
+    {% endfor %}
+  </select>
+  <select id="role-filter">
+    <option value="">All roles</option>
+    <option value="employee">Employee</option>
+    <option value="hr">HR</option>
+  </select>
+  <span class="filter-count" id="filter-count"></span>
+</div>
+
 <div class="card">
   {% if employees %}
-  <table>
+  <table id="employee-table">
     <thead>
       <tr><th>Name</th><th>Employee ID</th><th>Email</th><th>Department</th><th>Designation</th><th>Role</th><th></th></tr>
     </thead>
     <tbody>
       {% for e in employees %}
-      <tr>
-        <td>{{ e.full_name }}</td>
+      <tr data-name="{{ e.full_name|lower }}" data-email="{{ e.email|lower }}" data-dept="{{ e.department or '' }}" data-role="{{ e.role }}">
+        <td>
+          <div style="display:flex; align-items:center; gap:10px;">
+            {{ ui.avatar(e, 'sm') }}
+            <span>{{ e.full_name }}</span>
+          </div>
+        </td>
         <td class="mono">{{ e.employee_id }}</td>
         <td>{{ e.email }}</td>
         <td>{{ e.department or '—' }}</td>
@@ -28,9 +50,46 @@
       {% endfor %}
     </tbody>
   </table>
+  <div class="table-empty" id="no-results" style="display:none;">No employees match your filters.</div>
   {% else %}
   <div class="empty-state"><h3>No employees yet</h3></div>
   {% endif %}
 </div>
+
+<script>
+(function(){
+  var search = document.getElementById('emp-search');
+  var deptFilter = document.getElementById('dept-filter');
+  var roleFilter = document.getElementById('role-filter');
+  var rows = document.querySelectorAll('#employee-table tbody tr');
+  var countEl = document.getElementById('filter-count');
+  var noResults = document.getElementById('no-results');
+  if (!search) return;
+
+  function apply(){
+    var q = search.value.trim().toLowerCase();
+    var dept = deptFilter.value;
+    var role = roleFilter.value;
+    var visible = 0;
+
+    rows.forEach(function(row){
+      var matchesQ = !q || row.dataset.name.includes(q) || row.dataset.email.includes(q);
+      var matchesDept = !dept || row.dataset.dept === dept;
+      var matchesRole = !role || row.dataset.role === role;
+      var show = matchesQ && matchesDept && matchesRole;
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    countEl.textContent = visible + ' of ' + rows.length + ' shown';
+    noResults.style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  search.addEventListener('input', apply);
+  deptFilter.addEventListener('change', apply);
+  roleFilter.addEventListener('change', apply);
+  apply();
+})();
+</script>
 
 {% endblock %}

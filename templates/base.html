@@ -1,9 +1,16 @@
+{% import "_ui.html" as ui %}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}NovaHR{% endblock %}</title>
+  <script>
+    (function(){
+      var saved = localStorage.getItem('novahr-theme');
+      if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    })();
+  </script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -13,34 +20,34 @@
 
       <nav>
         <a href="{{ url_for('profile.profile') }}" class="{{ 'active' if request.endpoint == 'profile.profile' }}">
-          <span class="ic">01</span> Profile
+          <span class="ic">{{ ui.icon('profile') }}</span> Profile
         </a>
         <a href="{{ url_for('attendance.attendance_daily') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('attendance.attendance') }}">
-          <span class="ic">02</span> Attendance
+          <span class="ic">{{ ui.icon('attendance') }}</span> Attendance
         </a>
         <a href="{{ url_for('attendance.apply_leave') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('attendance.') and 'leave' in request.endpoint }}">
-          <span class="ic">03</span> Leave
+          <span class="ic">{{ ui.icon('leave') }}</span> Leave
         </a>
         <a href="{{ url_for('profile.my_payroll') }}" class="{{ 'active' if request.endpoint == 'profile.my_payroll' }}">
-          <span class="ic">04</span> Payroll
+          <span class="ic">{{ ui.icon('payroll') }}</span> Payroll
         </a>
 
         {% if session.get('role') == 'hr' %}
         <div class="nav-section">Admin</div>
         <a href="{{ url_for('admin.dashboard') }}" class="{{ 'active' if request.endpoint == 'admin.dashboard' }}">
-          <span class="ic">#</span> Dashboard
+          <span class="ic">{{ ui.icon('dashboard') }}</span> Dashboard
         </a>
         <a href="{{ url_for('admin.employee_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.employee') }}">
-          <span class="ic">#</span> Employees
+          <span class="ic">{{ ui.icon('employees') }}</span> Employees
         </a>
         <a href="{{ url_for('admin.all_attendance') }}" class="{{ 'active' if request.endpoint == 'admin.all_attendance' }}">
-          <span class="ic">#</span> Attendance
+          <span class="ic">{{ ui.icon('attendance') }}</span> Attendance
         </a>
         <a href="{{ url_for('admin.leave_requests') }}" class="{{ 'active' if request.endpoint and 'leave' in request.endpoint and request.endpoint.startswith('admin.') }}">
-          <span class="ic">#</span> Leave requests
+          <span class="ic">{{ ui.icon('leave-requests') }}</span> Leave requests
         </a>
         <a href="{{ url_for('admin.payroll_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.payroll') }}">
-          <span class="ic">#</span> Payroll
+          <span class="ic">{{ ui.icon('admin-payroll') }}</span> Payroll
         </a>
         {% endif %}
       </nav>
@@ -48,19 +55,22 @@
       <div class="spacer"></div>
 
       <div class="user-chip">
-        <img src="{{ url_for('static', filename='uploads/default.png') }}" alt="">
+        {{ ui.avatar(current_user, 'sm') }}
         <div>
           <div class="who">{{ session.get('full_name', 'User') }}</div>
           <div class="role">{{ session.get('role', '')|upper }}</div>
         </div>
       </div>
-      <a class="logout-link" href="{{ url_for('auth.logout') }}">Log out</a>
+      <a class="logout-link" href="{{ url_for('auth.logout') }}"><span class="ic" style="width:14px;height:14px;display:inline-flex;vertical-align:-2px;margin-right:4px;">{{ ui.icon('logout') }}</span>Log out</a>
+      <button type="button" class="theme-toggle" id="theme-toggle">
+        <span class="icon" id="theme-icon">🌙</span> <span id="theme-label">Dark mode</span>
+      </button>
     </aside>
 
     <main class="main">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-          <div class="flash-stack">
+          <div class="flash-stack" id="flash-stack">
             {% for category, message in messages %}
               <div class="flash flash-{{ category }}">{{ message }}</div>
             {% endfor %}
@@ -71,5 +81,50 @@
       {% block content %}{% endblock %}
     </main>
   </div>
+
+  <script>
+    // theme toggle
+    (function(){
+      var root = document.documentElement;
+      var btn = document.getElementById('theme-toggle');
+      var icon = document.getElementById('theme-icon');
+      var label = document.getElementById('theme-label');
+
+      function sync(){
+        var isDark = root.getAttribute('data-theme') === 'dark';
+        icon.textContent = isDark ? '☀️' : '🌙';
+        label.textContent = isDark ? 'Light mode' : 'Dark mode';
+      }
+      sync();
+
+      btn.addEventListener('click', function(){
+        var isDark = root.getAttribute('data-theme') === 'dark';
+        if (isDark){
+          root.removeAttribute('data-theme');
+          localStorage.setItem('novahr-theme', 'light');
+        } else {
+          root.setAttribute('data-theme', 'dark');
+          localStorage.setItem('novahr-theme', 'dark');
+        }
+        sync();
+      });
+    })();
+
+    // auto-dismissing toasts
+    (function(){
+      var stack = document.getElementById('flash-stack');
+      if (!stack) return;
+      var toasts = stack.querySelectorAll('.flash');
+      toasts.forEach(function(toast, i){
+        function dismiss(){
+          if (toast.classList.contains('is-leaving')) return;
+          toast.classList.add('is-leaving');
+          setTimeout(function(){ toast.remove(); }, 200);
+        }
+        toast.addEventListener('click', dismiss);
+        setTimeout(dismiss, 4500 + i * 300);
+      });
+    })();
+  </script>
 </body>
 </html>
