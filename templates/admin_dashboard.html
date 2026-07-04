@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard — NovaHR{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <span class="eyebrow">Admin</span>
+  <h1>Dashboard</h1>
+  <span class="desc">A snapshot of today across the organization.</span>
+</div>
+
+<div class="grid grid-3">
+  <div class="stat-card">
+    <div class="label">Total employees</div>
+    <div class="value">{{ total_employees }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Pending leave requests</div>
+    <div class="value">{{ pending_leaves }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Present today</div>
+    <div class="value">{{ today_present }}</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px;">
+  <div class="card-head"><h2>Quick links</h2></div>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <a href="{{ url_for('admin.employee_list') }}" class="btn btn-outline btn-sm">Manage employees</a>
+    <a href="{{ url_for('admin.all_attendance') }}" class="btn btn-outline btn-sm">View today's attendance</a>
+    <a href="{{ url_for('admin.leave_requests') }}" class="btn btn-outline btn-sm">Review leave requests</a>
+    <a href="{{ url_for('admin.payroll_list') }}" class="btn btn-outline btn-sm">Open payroll</a>
+  </div>
+</div>
+
+{% endblock %}

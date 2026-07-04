@@ -1,61 +1,176 @@
 {% extends "base.html" %}
-{% block title %}Apply for Leave{% endblock %}
-
+{% block title %}Apply for leave — NovaHR{% endblock %}
 {% block content %}
-<h3 class="mb-4"><i class="bi bi-envelope-paper"></i> Apply for Leave</h3>
 
-<div class="card shadow-sm" style="max-width: 600px;">
-  <div class="card-body">
-    <form method="POST" action="{{ url_for('attendance_leave.apply_leave') }}">
-      <div class="mb-3">
-        <label class="form-label">Leave Type</label>
-        <select name="leave_type" class="form-select" required>
-          <option value="" disabled selected>Select leave type</option>
-          <option value="Paid">Paid</option>
-          <option value="Sick">Sick</option>
-          <option value="Unpaid">Unpaid</option>
+<div class="page-head">
+  <span class="eyebrow">Leave</span>
+  <h1>Apply for leave</h1>
+  <span class="desc">Pick your dates on the calendar, choose a leave type, and add any remarks.</span>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <div class="card-head"><h2>Select dates</h2></div>
+    <div class="cal-nav">
+      <button type="button" id="cal-prev">‹</button>
+      <span class="m" id="cal-month-label"></span>
+      <button type="button" id="cal-next">›</button>
+    </div>
+    <div class="cal-grid" id="cal-dow-row">
+      <div class="cal-dow">Su</div><div class="cal-dow">Mo</div><div class="cal-dow">Tu</div>
+      <div class="cal-dow">We</div><div class="cal-dow">Th</div><div class="cal-dow">Fr</div><div class="cal-dow">Sa</div>
+    </div>
+    <div class="cal-grid" id="cal-days"></div>
+
+    <div class="range-readout">
+      <span><span class="k">From</span><span id="readout-start">—</span></span>
+      <span><span class="k">To</span><span id="readout-end">—</span></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Request details</h2></div>
+    <form method="POST" action="{{ url_for('attendance.apply_leave') }}" id="leave-form">
+      <input type="hidden" name="start_date" id="start_date" required>
+      <input type="hidden" name="end_date" id="end_date" required>
+
+      <div class="field">
+        <label for="leave_type">Leave type</label>
+        <select id="leave_type" name="leave_type" required>
+          <option value="">Select type…</option>
+          <option value="Paid">Paid leave</option>
+          <option value="Sick">Sick leave</option>
+          <option value="Unpaid">Unpaid leave</option>
         </select>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Select Date Range (calendar)</label>
-        <input type="text" id="dateRange" class="form-control" placeholder="Click to pick dates" autocomplete="off" required>
-        <input type="hidden" name="start_date" id="start_date">
-        <input type="hidden" name="end_date" id="end_date">
+      <div class="field">
+        <label for="remarks">Remarks <span class="text-muted" style="text-transform:none;font-weight:400;">(optional)</span></label>
+        <textarea id="remarks" name="remarks" placeholder="Reason for your leave request…"></textarea>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Remarks</label>
-        <textarea name="remarks" class="form-control" rows="3" placeholder="Reason for leave (optional)"></textarea>
-      </div>
-
-      <button type="submit" class="btn btn-primary w-100">
-        <i class="bi bi-send"></i> Submit Leave Request
-      </button>
+      <button type="submit" class="btn btn-primary btn-block" id="submit-btn" disabled>Submit request</button>
+      <span class="hint" id="date-hint" style="display:block; text-align:center; margin-top:10px;">Select a start and end date above.</span>
     </form>
   </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-  flatpickr("#dateRange", {
-    mode: "range",
-    dateFormat: "Y-m-d",
-    minDate: "today",
-    onClose: function(selectedDates) {
-      if (selectedDates.length === 2) {
-        document.getElementById("start_date").value = selectedDates[0].toISOString().slice(0,10);
-        document.getElementById("end_date").value = selectedDates[1].toISOString().slice(0,10);
-      } else if (selectedDates.length === 1) {
-        // single day leave
-        var d = selectedDates[0].toISOString().slice(0,10);
-        document.getElementById("start_date").value = d;
-        document.getElementById("end_date").value = d;
+(function(){
+  var today = new Date();
+  var viewYear = today.getFullYear();
+  var viewMonth = today.getMonth();
+  var rangeStart = null, rangeEnd = null;
+
+  var monthLabel = document.getElementById('cal-month-label');
+  var daysEl = document.getElementById('cal-days');
+  var startInput = document.getElementById('start_date');
+  var endInput = document.getElementById('end_date');
+  var readoutStart = document.getElementById('readout-start');
+  var readoutEnd = document.getElementById('readout-end');
+  var submitBtn = document.getElementById('submit-btn');
+  var dateHint = document.getElementById('date-hint');
+
+  var monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  function fmt(y, m, d){
+    return y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+  }
+  function displayFmt(y, m, d){
+    return d + ' ' + monthNames[m].slice(0,3) + ' ' + y;
+  }
+  function dateKey(y,m,d){ return y*10000 + m*100 + d; }
+
+  function render(){
+    monthLabel.textContent = monthNames[viewMonth] + ' ' + viewYear;
+    daysEl.innerHTML = '';
+    var firstDay = new Date(viewYear, viewMonth, 1).getDay();
+    var numDays = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+    for (var i = 0; i < firstDay; i++){
+      var blank = document.createElement('div');
+      blank.className = 'cal-day muted-day';
+      daysEl.appendChild(blank);
+    }
+
+    for (var d = 1; d <= numDays; d++){
+      var cell = document.createElement('div');
+      cell.className = 'cal-day';
+      cell.textContent = d;
+      var key = dateKey(viewYear, viewMonth, d);
+
+      if (rangeStart){
+        var sKey = dateKey(rangeStart.y, rangeStart.m, rangeStart.d);
+        if (rangeEnd){
+          var eKey = dateKey(rangeEnd.y, rangeEnd.m, rangeEnd.d);
+          if (key === sKey) cell.classList.add('range-start');
+          if (key === eKey) cell.classList.add('range-end');
+          if (key > sKey && key < eKey) cell.classList.add('in-range');
+        } else if (key === sKey){
+          cell.classList.add('range-start');
+        }
+      }
+
+      (function(y,m,dd){
+        cell.addEventListener('click', function(){ pick(y,m,dd); });
+      })(viewYear, viewMonth, d);
+
+      daysEl.appendChild(cell);
+    }
+  }
+
+  function pick(y, m, d){
+    var key = dateKey(y,m,d);
+    if (!rangeStart || (rangeStart && rangeEnd)){
+      rangeStart = {y:y,m:m,d:d};
+      rangeEnd = null;
+    } else {
+      var sKey = dateKey(rangeStart.y, rangeStart.m, rangeStart.d);
+      if (key < sKey){
+        rangeEnd = rangeStart;
+        rangeStart = {y:y,m:m,d:d};
+      } else {
+        rangeEnd = {y:y,m:m,d:d};
       }
     }
+    updateReadout();
+    render();
+  }
+
+  function updateReadout(){
+    if (rangeStart){
+      readoutStart.textContent = displayFmt(rangeStart.y, rangeStart.m, rangeStart.d);
+      startInput.value = fmt(rangeStart.y, rangeStart.m, rangeStart.d);
+    } else {
+      readoutStart.textContent = '—';
+      startInput.value = '';
+    }
+    if (rangeEnd){
+      readoutEnd.textContent = displayFmt(rangeEnd.y, rangeEnd.m, rangeEnd.d);
+      endInput.value = fmt(rangeEnd.y, rangeEnd.m, rangeEnd.d);
+    } else if (rangeStart) {
+      readoutEnd.textContent = displayFmt(rangeStart.y, rangeStart.m, rangeStart.d);
+      endInput.value = fmt(rangeStart.y, rangeStart.m, rangeStart.d);
+    } else {
+      readoutEnd.textContent = '—';
+      endInput.value = '';
+    }
+    var ready = !!startInput.value && !!endInput.value;
+    submitBtn.disabled = !ready;
+    dateHint.style.display = ready ? 'none' : 'block';
+  }
+
+  document.getElementById('cal-prev').addEventListener('click', function(){
+    viewMonth--; if (viewMonth < 0){ viewMonth = 11; viewYear--; }
+    render();
   });
+  document.getElementById('cal-next').addEventListener('click', function(){
+    viewMonth++; if (viewMonth > 11){ viewMonth = 0; viewYear++; }
+    render();
+  });
+
+  render();
+})();
 </script>
+
 {% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}{{ employee.full_name }} — NovaHR{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <span class="eyebrow">Admin · Employee</span>
+  <h1>{{ employee.full_name }}</h1>
+  <span class="desc mono">{{ employee.employee_id }}</span>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <div class="card-head"><h2>Edit details</h2></div>
+    <form method="POST" action="{{ url_for('admin.employee_detail', user_id=employee.id) }}">
+      <div class="field">
+        <label for="full_name">Full name</label>
+        <input type="text" id="full_name" name="full_name" value="{{ employee.full_name }}">
+      </div>
+      <div class="field">
+        <label for="department">Department</label>
+        <input type="text" id="department" name="department" value="{{ employee.department or '' }}">
+      </div>
+      <div class="field">
+        <label for="designation">Designation</label>
+        <input type="text" id="designation" name="designation" value="{{ employee.designation or '' }}">
+      </div>
+      <div class="field">
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" name="phone" value="{{ employee.phone or '' }}">
+      </div>
+      <div class="field">
+        <label for="address">Address</label>
+        <textarea id="address" name="address">{{ employee.address or '' }}</textarea>
+      </div>
+      <div class="field">
+        <label for="role">Role</label>
+        <select id="role" name="role">
+          <option value="employee" {% if employee.role == 'employee' %}selected{% endif %}>Employee</option>
+          <option value="hr" {% if employee.role == 'hr' %}selected{% endif %}>HR / Admin</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Save changes</button>
+    </form>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-head"><h2>Recent attendance</h2><span class="muted">Last 30 records</span></div>
+      {% if attendance_records %}
+      <table>
+        <thead><tr><th>Date</th><th>Status</th><th>In</th><th>Out</th></tr></thead>
+        <tbody>
+          {% for r in attendance_records %}
+          <tr>
+            <td class="mono">{{ r.date.strftime('%d %b') }}</td>
+            <td><span class="pill pill-{{ r.status|lower|replace(' ', '-') }}">{{ r.status }}</span></td>
+            <td class="mono">{{ r.check_in.strftime('%H:%M') if r.check_in else '—' }}</td>
+            <td class="mono">{{ r.check_out.strftime('%H:%M') if r.check_out else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="table-empty">No attendance recorded.</div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Leave history</h2></div>
+      {% if leave_records %}
+      <table>
+        <thead><tr><th>Type</th><th>Dates</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for l in leave_records %}
+          <tr>
+            <td>{{ l.leave_type }}</td>
+            <td class="mono">{{ l.start_date.strftime('%d %b') }} – {{ l.end_date.strftime('%d %b') }}</td>
+            <td><span class="pill pill-{{ l.status|lower }}">{{ l.status }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="table-empty">No leave requests.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

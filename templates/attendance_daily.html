@@ -1,46 +1,53 @@
 {% extends "base.html" %}
-{% block title %}Daily Attendance{% endblock %}
-
+{% block title %}Attendance — NovaHR{% endblock %}
 {% block content %}
-<h3 class="mb-4"><i class="bi bi-clock"></i> Today &mdash; {{ today.strftime('%A, %d %B %Y') }}</h3>
 
-<div class="card status-card shadow-sm mb-4">
-  <div class="card-body">
-    <div class="row align-items-center text-center">
-      <div class="col-md-4 border-end">
-        <p class="text-muted mb-1">Check-In</p>
-        <h4>{{ record.check_in.strftime('%H:%M:%S') if record and record.check_in else '--:--:--' }}</h4>
-      </div>
-      <div class="col-md-4 border-end">
-        <p class="text-muted mb-1">Check-Out</p>
-        <h4>{{ record.check_out.strftime('%H:%M:%S') if record and record.check_out else '--:--:--' }}</h4>
-      </div>
-      <div class="col-md-4">
-        <p class="text-muted mb-1">Status</p>
-        {% set status = record.status if record else 'Absent' %}
-        <span class="badge fs-6 badge-{{ status.lower().replace(' ', '-') }}">{{ status }}</span>
-      </div>
+<div class="page-head">
+  <span class="eyebrow">Attendance</span>
+  <h1>Today — {{ today.strftime('%A, %d %B %Y') }}</h1>
+  <span class="desc">Mark your check-in and check-out for the day.</span>
+</div>
+
+<div class="grid grid-3" style="margin-bottom:18px;">
+  <div class="stat-card">
+    <div class="label">Status</div>
+    <div class="value">
+      {% if record %}
+        <span class="pill pill-{{ record.status|lower|replace(' ', '-') }}">{{ record.status }}</span>
+      {% else %}
+        <span class="pill pill-absent">Not checked in</span>
+      {% endif %}
     </div>
-
-    <hr>
-
-    <div class="d-flex gap-3 justify-content-center">
-      <form action="{{ url_for('attendance_leave.check_in') }}" method="POST">
-        <button type="submit" class="btn btn-success px-4" {% if record and record.check_in %}disabled{% endif %}>
-          <i class="bi bi-box-arrow-in-right"></i> Check In
-        </button>
-      </form>
-      <form action="{{ url_for('attendance_leave.check_out') }}" method="POST">
-        <button type="submit" class="btn btn-danger px-4" {% if not record or not record.check_in or record.check_out %}disabled{% endif %}>
-          <i class="bi bi-box-arrow-right"></i> Check Out
-        </button>
-      </form>
-    </div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Check-in</div>
+    <div class="value mono">{{ record.check_in.strftime('%H:%M:%S') if record and record.check_in else '—' }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Check-out</div>
+    <div class="value mono">{{ record.check_out.strftime('%H:%M:%S') if record and record.check_out else '—' }}</div>
   </div>
 </div>
 
-<div class="d-flex gap-2">
-  <a href="{{ url_for('attendance_leave.attendance_weekly') }}" class="btn btn-outline-primary">View Weekly Attendance &rarr;</a>
-  <a href="{{ url_for('attendance_leave.attendance_history') }}" class="btn btn-outline-secondary">View Full History &rarr;</a>
+<div class="card">
+  <div class="card-head"><h2>Action</h2></div>
+  <div style="display:flex; gap:12px;">
+    <form method="POST" action="{{ url_for('attendance.check_in') }}">
+      <button type="submit" class="btn btn-primary" {% if record and record.check_in %}disabled{% endif %}>
+        Check in
+      </button>
+    </form>
+    <form method="POST" action="{{ url_for('attendance.check_out') }}">
+      <button type="submit" class="btn btn-accent" {% if not record or not record.check_in or record.check_out %}disabled{% endif %}>
+        Check out
+      </button>
+    </form>
+  </div>
 </div>
+
+<div style="display:flex; gap:10px; margin-top:18px;">
+  <a href="{{ url_for('attendance.attendance_weekly') }}" class="btn btn-outline btn-sm">View weekly →</a>
+  <a href="{{ url_for('attendance.attendance_history') }}" class="btn btn-outline btn-sm">View history →</a>
+</div>
+
 {% endblock %}

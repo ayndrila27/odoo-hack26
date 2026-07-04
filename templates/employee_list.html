@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Employees — NovaHR{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <span class="eyebrow">Admin</span>
+  <h1>Employees</h1>
+  <span class="desc">Everyone with an account in the system.</span>
+</div>
+
+<div class="card">
+  {% if employees %}
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Employee ID</th><th>Email</th><th>Department</th><th>Designation</th><th>Role</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for e in employees %}
+      <tr>
+        <td>{{ e.full_name }}</td>
+        <td class="mono">{{ e.employee_id }}</td>
+        <td>{{ e.email }}</td>
+        <td>{{ e.department or '—' }}</td>
+        <td>{{ e.designation or '—' }}</td>
+        <td><span class="pill pill-{{ e.role }}">{{ e.role|upper }}</span></td>
+        <td><a href="{{ url_for('admin.employee_detail', user_id=e.id) }}" class="btn btn-outline btn-sm">View</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state"><h3>No employees yet</h3></div>
+  {% endif %}
+</div>
+
+{% endblock %}

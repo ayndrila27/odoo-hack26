@@ -1,65 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile | NovaHR</title>
+{% extends "base.html" %}
+{% block title %}Edit profile — NovaHR{% endblock %}
+{% block content %}
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+<div class="page-head">
+  <span class="eyebrow">Profile</span>
+  <h1>Edit your details</h1>
+  <span class="desc">You can update your contact information. Job and salary details are managed by HR.</span>
+</div>
 
-    <header class="topbar">
-        <div class="topbar-brand">
-            <span class="brand-mark">N</span>
-            <span class="brand-name">NovaHR</span>
-        </div>
-        <div class="topbar-user">
-            <span class="topbar-user-name">{{ session.get('full_name', '') }}</span>
-            <span class="badge badge-role">{{ session.get('role', '')|capitalize }}</span>
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm">Logout</a>
-        </div>
-    </header>
+<div class="card" style="max-width:520px;">
+  <form method="POST" action="{{ url_for('profile.edit_profile') }}">
+    <div class="field">
+      <label>Full name</label>
+      <input type="text" value="{{ user.full_name }}" disabled>
+      <span class="hint">Contact HR to change your legal name.</span>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="text" value="{{ user.email }}" disabled>
+    </div>
+    <div class="field">
+      <label for="phone">Phone number</label>
+      <input type="tel" id="phone" name="phone" value="{{ user.phone or '' }}" placeholder="+91 98765 43210">
+    </div>
+    <div class="field">
+      <label for="address">Address</label>
+      <textarea id="address" name="address" placeholder="Street, city, state, PIN">{{ user.address or '' }}</textarea>
+    </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="flash-wrap">
-                {% for category, message in messages %}
-                    <div class="flash flash-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
+    <div style="display:flex; gap:10px;">
+      <button type="submit" class="btn btn-primary">Save changes</button>
+      <a href="{{ url_for('profile.profile') }}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
 
-    <main class="content">
-        <h1 class="page-title">Edit Profile</h1>
-
-        <div class="card form-card">
-            <div class="card-header">
-                <h3>Edit Contact Details</h3>
-            </div>
-            <p class="card-note">Only your phone number and address can be updated here.
-                Other details are managed by HR.</p>
-
-            <form method="POST" action="{{ url_for('profile.edit_profile') }}" class="auth-form">
-
-                <label class="form-label" for="phone">Phone Number</label>
-                <input class="form-input" type="tel" id="phone" name="phone"
-                       value="{{ user.phone or '' }}" placeholder="+91 98765 43210">
-
-                <label class="form-label" for="address">Address</label>
-                <textarea class="form-input form-textarea" id="address" name="address"
-                          placeholder="House no., street, city, state, PIN">{{ user.address or '' }}</textarea>
-
-                <div class="form-actions">
-                    <a href="{{ url_for('profile.profile') }}" class="btn btn-outline">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </main>
-
-</body>
-</html>
+{% endblock %}

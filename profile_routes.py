@@ -9,10 +9,33 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 
-from models import db
+from datetime import datetime
+
+from models import db, Payroll
 from auth_utils import login_required, get_current_user, allowed_file
 
 profile_bp = Blueprint("profile", __name__)
+
+
+@profile_bp.route("/profile/payroll")
+@login_required
+def my_payroll():
+    """Read-only payroll view for the logged-in employee (spec 3.6.1)."""
+    user = get_current_user()
+    month = int(request.args.get("month", datetime.utcnow().month))
+    year = int(request.args.get("year", datetime.utcnow().year))
+
+    payroll = Payroll.query.filter_by(user_id=user.id, month=month, year=year).first()
+    history = (
+        Payroll.query.filter_by(user_id=user.id)
+        .order_by(Payroll.year.desc(), Payroll.month.desc())
+        .limit(12)
+        .all()
+    )
+
+    return render_template(
+        "my_payroll.html", payroll=payroll, history=history, month=month, year=year
+    )
 
 
 @profile_bp.route("/profile")

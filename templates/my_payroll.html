@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Payroll — NovaHR{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <span class="eyebrow">Payroll</span>
+  <h1>Your salary — {{ month }}/{{ year }}</h1>
+  <span class="desc">Read-only. Contact HR if anything here needs correcting.</span>
+</div>
+
+<form method="GET" action="{{ url_for('profile.my_payroll') }}" style="margin-bottom:18px; display:flex; gap:10px; align-items:flex-end;">
+  <div class="field" style="margin-bottom:0;">
+    <label for="month">Month</label>
+    <select id="month" name="month" onchange="this.form.submit()">
+      {% for m in range(1, 13) %}
+      <option value="{{ m }}" {% if m == month %}selected{% endif %}>{{ m }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field" style="margin-bottom:0;">
+    <label for="year">Year</label>
+    <input type="number" id="year" name="year" value="{{ year }}" style="width:100px;" onchange="this.form.submit()">
+  </div>
+</form>
+
+{% if payroll %}
+<div class="card" style="max-width:480px;">
+  <div class="card-head"><h2>Payslip</h2></div>
+  <div class="payslip-line"><span>Basic salary</span><span class="v">₹{{ '%.2f'|format(payroll.basic_salary) }}</span></div>
+  <div class="payslip-line"><span>HRA</span><span class="v">₹{{ '%.2f'|format(payroll.hra) }}</span></div>
+  <div class="payslip-line"><span>DA</span><span class="v">₹{{ '%.2f'|format(payroll.da) }}</span></div>
+  <div class="payslip-line"><span>Medical allowance</span><span class="v">₹{{ '%.2f'|format(payroll.medical_allowance) }}</span></div>
+  <div class="payslip-line"><span>Other allowance</span><span class="v">₹{{ '%.2f'|format(payroll.other_allowance) }}</span></div>
+  <div class="payslip-line total"><span>Gross salary</span><span class="v">₹{{ '%.2f'|format(payroll.gross_salary) }}</span></div>
+
+  <div class="divider"></div>
+
+  <div class="payslip-line"><span>Provident fund</span><span class="v">−₹{{ '%.2f'|format(payroll.provident_fund) }}</span></div>
+  <div class="payslip-line"><span>Professional tax</span><span class="v">−₹{{ '%.2f'|format(payroll.professional_tax) }}</span></div>
+  <div class="payslip-line"><span>Other deduction</span><span class="v">−₹{{ '%.2f'|format(payroll.other_deduction) }}</span></div>
+  <div class="payslip-line total"><span>Net salary</span><span class="v">₹{{ '%.2f'|format(payroll.net_salary) }}</span></div>
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state">
+    <h3>No payroll on file for this month</h3>
+    <span>HR hasn't set up your salary structure for {{ month }}/{{ year }} yet.</span>
+  </div>
+</div>
+{% endif %}
+
+{% if history %}
+<div class="card">
+  <div class="card-head"><h2>Recent history</h2></div>
+  <table>
+    <thead><tr><th>Month</th><th>Gross</th><th>Deductions</th><th>Net</th></tr></thead>
+    <tbody>
+      {% for p in history %}
+      <tr>
+        <td class="mono">{{ p.month }}/{{ p.year }}</td>
+        <td class="mono">₹{{ '%.2f'|format(p.gross_salary) }}</td>
+        <td class="mono">₹{{ '%.2f'|format(p.total_deductions) }}</td>
+        <td class="mono">₹{{ '%.2f'|format(p.net_salary) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% endblock %}

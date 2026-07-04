@@ -1,38 +1,30 @@
 {% extends "base.html" %}
-{% block title %}Weekly Attendance{% endblock %}
-
+{% block title %}Weekly attendance — NovaHR{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h3 class="mb-0"><i class="bi bi-calendar-week"></i> Week of {{ monday.strftime('%d %b') }} &ndash; {{ sunday.strftime('%d %b %Y') }}</h3>
-  <div class="btn-group">
-    <a href="{{ url_for('attendance_leave.attendance_weekly', offset=offset-1) }}" class="btn btn-outline-secondary btn-sm">&larr; Prev</a>
-    <a href="{{ url_for('attendance_leave.attendance_weekly', offset=0) }}" class="btn btn-outline-secondary btn-sm">This Week</a>
-    <a href="{{ url_for('attendance_leave.attendance_weekly', offset=offset+1) }}" class="btn btn-outline-secondary btn-sm">Next &rarr;</a>
-  </div>
+
+<div class="page-head">
+  <span class="eyebrow">Attendance</span>
+  <h1>Week of {{ monday.strftime('%d %b') }} – {{ sunday.strftime('%d %b %Y') }}</h1>
+  <span class="desc">Your check-in and check-out record for each day this week.</span>
 </div>
 
-<div class="table-responsive">
-  <table class="table table-bordered bg-white align-middle text-center">
-    <thead class="table-primary">
-      <tr>
-        <th>Day</th>
-        <th>Date</th>
-        <th>Check-In</th>
-        <th>Check-Out</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for d in days %}
-      <tr>
-        <td>{{ d.weekday }}</td>
-        <td>{{ d.date.strftime('%d %b %Y') }}</td>
-        <td>{{ d.check_in }}</td>
-        <td>{{ d.check_out }}</td>
-        <td><span class="badge badge-{{ d.status.lower().replace(' ', '-') }}">{{ d.status }}</span></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div style="display:flex; gap:10px; margin-bottom:18px;">
+  <a href="{{ url_for('attendance.attendance_weekly', offset=offset-1) }}" class="btn btn-outline btn-sm">← Previous week</a>
+  {% if offset != 0 %}
+  <a href="{{ url_for('attendance.attendance_weekly') }}" class="btn btn-outline btn-sm">This week</a>
+  {% endif %}
+  <a href="{{ url_for('attendance.attendance_weekly', offset=offset+1) }}" class="btn btn-outline btn-sm">Next week →</a>
 </div>
+
+<div class="week-grid">
+  {% for day in days %}
+  <div class="week-day">
+    <div class="d">{{ day.weekday[:3] }}</div>
+    <div class="n">{{ day.date.day }}</div>
+    <span class="pill pill-{{ day.status|lower|replace(' ', '-') }}">{{ day.status }}</span>
+    <div class="times">In {{ day.check_in }}<br>Out {{ day.check_out }}</div>
+  </div>
+  {% endfor %}
+</div>
+
 {% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Leave requests — NovaHR{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <span class="eyebrow">Admin</span>
+  <h1>Leave requests</h1>
+  <span class="desc">Approve or reject time-off requests from your team.</span>
+</div>
+
+<div class="filter-tabs">
+  {% for f in ['Pending', 'Approved', 'Rejected', 'All'] %}
+  <a href="{{ url_for('admin.leave_requests', status=f) }}" class="{{ 'active' if status_filter == f }}">{{ f }}</a>
+  {% endfor %}
+</div>
+
+<div class="card">
+  {% if leaves %}
+  <table>
+    <thead><tr><th>Employee</th><th>Type</th><th>Dates</th><th>Remarks</th><th>Status</th><th>Decision</th></tr></thead>
+    <tbody>
+      {% for leave, user in leaves %}
+      <tr>
+        <td>{{ user.full_name }}</td>
+        <td>{{ leave.leave_type }}</td>
+        <td class="mono">{{ leave.start_date.strftime('%d %b') }} – {{ leave.end_date.strftime('%d %b %Y') }}</td>
+        <td>{{ leave.remarks or '—' }}</td>
+        <td><span class="pill pill-{{ leave.status|lower }}">{{ leave.status }}</span></td>
+        <td>
+          {% if leave.status == 'Pending' %}
+          <form method="POST" action="{{ url_for('admin.decide_leave', leave_id=leave.id) }}" style="display:flex; gap:6px; align-items:center;">
+            <input type="text" name="comment" placeholder="Comment (optional)" style="width:150px; padding:6px 8px; font-size:12.5px;">
+            <button type="submit" name="decision" value="Approved" class="btn btn-primary btn-sm">Approve</button>
+            <button type="submit" name="decision" value="Rejected" class="btn btn-danger btn-sm">Reject</button>
+          </form>
+          {% else %}
+          <span class="text-muted" style="font-size:13px;">{{ leave.admin_comment or 'No comment' }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <h3>Nothing here</h3>
+    <span>No leave requests match this filter.</span>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Attendance — NovaHR{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <span class="eyebrow">Admin</span>
+  <h1>Attendance — {{ selected_date.strftime('%d %B %Y') }}</h1>
+  <span class="desc">Attendance for every employee on the selected date.</span>
+</div>
+
+<form method="GET" action="{{ url_for('admin.all_attendance') }}" style="margin-bottom:18px; display:flex; gap:10px; align-items:flex-end;">
+  <div class="field" style="margin-bottom:0;">
+    <label for="date">Date</label>
+    <input type="date" id="date" name="date" value="{{ selected_date.isoformat() }}" onchange="this.form.submit()">
+  </div>
+</form>
+
+<div class="card">
+  {% if records %}
+  <table>
+    <thead><tr><th>Employee</th><th>Employee ID</th><th>Status</th><th>Check-in</th><th>Check-out</th></tr></thead>
+    <tbody>
+      {% for att, user in records %}
+      <tr>
+        <td>{{ user.full_name }}</td>
+        <td class="mono">{{ user.employee_id }}</td>
+        <td><span class="pill pill-{{ att.status|lower|replace(' ', '-') }}">{{ att.status }}</span></td>
+        <td class="mono">{{ att.check_in.strftime('%H:%M') if att.check_in else '—' }}</td>
+        <td class="mono">{{ att.check_out.strftime('%H:%M') if att.check_out else '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <h3>No records for this date</h3>
+    <span>No one checked in on {{ selected_date.strftime('%d %B %Y') }}.</span>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

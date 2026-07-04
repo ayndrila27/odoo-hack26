@@ -1,58 +1,51 @@
 {% extends "base.html" %}
-{% block title %}Attendance History{% endblock %}
-
+{% block title %}Attendance history — NovaHR{% endblock %}
 {% block content %}
-<h3 class="mb-4"><i class="bi bi-clock-history"></i> Attendance History</h3>
 
-<div class="row mb-4 text-center">
-  <div class="col-md-4">
-    <div class="card status-card shadow-sm">
-      <div class="card-body">
-        <h2 class="text-success">{{ total_present }}</h2>
-        <p class="text-muted mb-0">Present / Half-day</p>
-      </div>
-    </div>
+<div class="page-head">
+  <span class="eyebrow">Attendance</span>
+  <h1>Full history</h1>
+  <span class="desc">Every recorded day since you joined.</span>
+</div>
+
+<div class="grid grid-3" style="margin-bottom:18px;">
+  <div class="stat-card">
+    <div class="label">Present days</div>
+    <div class="value">{{ total_present }}</div>
   </div>
-  <div class="col-md-4">
-    <div class="card status-card shadow-sm">
-      <div class="card-body">
-        <h2 class="text-danger">{{ total_absent }}</h2>
-        <p class="text-muted mb-0">Absent</p>
-      </div>
-    </div>
+  <div class="stat-card">
+    <div class="label">Absent days</div>
+    <div class="value">{{ total_absent }}</div>
   </div>
-  <div class="col-md-4">
-    <div class="card status-card shadow-sm">
-      <div class="card-body">
-        <h2 class="text-secondary">{{ total_leave }}</h2>
-        <p class="text-muted mb-0">On Leave</p>
-      </div>
-    </div>
+  <div class="stat-card">
+    <div class="label">Leave days</div>
+    <div class="value">{{ total_leave }}</div>
   </div>
 </div>
 
-<div class="table-responsive">
-  <table class="table table-striped bg-white align-middle text-center">
-    <thead class="table-primary">
-      <tr>
-        <th>Date</th>
-        <th>Check-In</th>
-        <th>Check-Out</th>
-        <th>Status</th>
-      </tr>
+<div class="card">
+  {% if records %}
+  <table>
+    <thead>
+      <tr><th>Date</th><th>Status</th><th>Check-in</th><th>Check-out</th></tr>
     </thead>
     <tbody>
       {% for r in records %}
       <tr>
-        <td>{{ r.date.strftime('%d %b %Y') }}</td>
-        <td>{{ r.check_in.strftime('%H:%M:%S') if r.check_in else '-' }}</td>
-        <td>{{ r.check_out.strftime('%H:%M:%S') if r.check_out else '-' }}</td>
-        <td><span class="badge badge-{{ r.status.lower().replace(' ', '-') }}">{{ r.status }}</span></td>
+        <td class="mono">{{ r.date.strftime('%d %b %Y') }}</td>
+        <td><span class="pill pill-{{ r.status|lower|replace(' ', '-') }}">{{ r.status }}</span></td>
+        <td class="mono">{{ r.check_in.strftime('%H:%M') if r.check_in else '—' }}</td>
+        <td class="mono">{{ r.check_out.strftime('%H:%M') if r.check_out else '—' }}</td>
       </tr>
-      {% else %}
-      <tr><td colspan="4" class="text-muted py-4">No attendance records yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>
+  {% else %}
+  <div class="empty-state">
+    <h3>No attendance recorded yet</h3>
+    <span>Check in for the first time to start building your history.</span>
+  </div>
+  {% endif %}
 </div>
+
 {% endblock %}

@@ -1,42 +1,42 @@
 {% extends "base.html" %}
-{% block title %}Leave Status{% endblock %}
-
+{% block title %}Leave status — NovaHR{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h3 class="mb-0"><i class="bi bi-list-check"></i> My Leave Requests</h3>
-  <a href="{{ url_for('attendance_leave.apply_leave') }}" class="btn btn-primary btn-sm">
-    <i class="bi bi-plus-lg"></i> Apply for Leave
-  </a>
+
+<div class="page-head">
+  <span class="eyebrow">Leave</span>
+  <h1>Your leave requests</h1>
+  <span class="desc">Track the status of everything you've applied for.</span>
 </div>
 
-<div class="table-responsive">
-  <table class="table table-hover bg-white align-middle text-center">
-    <thead class="table-primary">
-      <tr>
-        <th>Applied On</th>
-        <th>Type</th>
-        <th>From</th>
-        <th>To</th>
-        <th>Remarks</th>
-        <th>Status</th>
-        <th>Admin Comment</th>
-      </tr>
+<div style="margin-bottom:18px;">
+  <a href="{{ url_for('attendance.apply_leave') }}" class="btn btn-accent">+ Apply for leave</a>
+</div>
+
+<div class="card">
+  {% if leaves %}
+  <table>
+    <thead>
+      <tr><th>Type</th><th>Dates</th><th>Remarks</th><th>Status</th><th>HR comment</th><th>Applied</th></tr>
     </thead>
     <tbody>
       {% for l in leaves %}
       <tr>
-        <td>{{ l.applied_on.strftime('%d %b %Y') }}</td>
         <td>{{ l.leave_type }}</td>
-        <td>{{ l.start_date.strftime('%d %b %Y') }}</td>
-        <td>{{ l.end_date.strftime('%d %b %Y') }}</td>
-        <td>{{ l.remarks or '-' }}</td>
-        <td><span class="badge badge-{{ l.status.lower() }}">{{ l.status }}</span></td>
-        <td>{{ l.admin_comment or '-' }}</td>
+        <td class="mono">{{ l.start_date.strftime('%d %b') }} – {{ l.end_date.strftime('%d %b %Y') }}</td>
+        <td>{{ l.remarks or '—' }}</td>
+        <td><span class="pill pill-{{ l.status|lower }}">{{ l.status }}</span></td>
+        <td>{{ l.admin_comment or '—' }}</td>
+        <td class="mono">{{ l.applied_on.strftime('%d %b %Y') }}</td>
       </tr>
-      {% else %}
-      <tr><td colspan="7" class="text-muted py-4">No leave requests yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>
+  {% else %}
+  <div class="empty-state">
+    <h3>No leave requests yet</h3>
+    <span>Apply for your first leave to see it tracked here.</span>
+  </div>
+  {% endif %}
 </div>
+
 {% endblock %}

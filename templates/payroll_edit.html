@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Edit payroll — NovaHR{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <span class="eyebrow">Admin · Payroll</span>
+  <h1>{{ employee.full_name }} — {{ month }}/{{ year }}</h1>
+  <span class="desc mono">{{ employee.employee_id }}</span>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <div class="card-head"><h2>Salary structure</h2></div>
+    <form method="POST" action="{{ url_for('admin.payroll_edit', user_id=employee.id, month=month, year=year) }}">
+      <div class="field">
+        <label for="basic_salary">Basic salary</label>
+        <input type="number" step="0.01" id="basic_salary" name="basic_salary" value="{{ payroll.basic_salary }}">
+      </div>
+
+      <div class="grid grid-2">
+        <div class="field">
+          <label for="hra">HRA</label>
+          <input type="number" step="0.01" id="hra" name="hra" value="{{ payroll.hra }}">
+        </div>
+        <div class="field">
+          <label for="da">DA</label>
+          <input type="number" step="0.01" id="da" name="da" value="{{ payroll.da }}">
+        </div>
+        <div class="field">
+          <label for="medical_allowance">Medical allowance</label>
+          <input type="number" step="0.01" id="medical_allowance" name="medical_allowance" value="{{ payroll.medical_allowance }}">
+        </div>
+        <div class="field">
+          <label for="other_allowance">Other allowance</label>
+          <input type="number" step="0.01" id="other_allowance" name="other_allowance" value="{{ payroll.other_allowance }}">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="grid grid-2">
+        <div class="field">
+          <label for="provident_fund">Provident fund</label>
+          <input type="number" step="0.01" id="provident_fund" name="provident_fund" value="{{ payroll.provident_fund }}">
+        </div>
+        <div class="field">
+          <label for="professional_tax">Professional tax</label>
+          <input type="number" step="0.01" id="professional_tax" name="professional_tax" value="{{ payroll.professional_tax }}">
+        </div>
+        <div class="field">
+          <label for="other_deduction">Other deduction</label>
+          <input type="number" step="0.01" id="other_deduction" name="other_deduction" value="{{ payroll.other_deduction }}">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Save payroll</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Payslip preview</h2></div>
+    <div class="payslip-line"><span>Basic salary</span><span class="v">₹{{ '%.2f'|format(payroll.basic_salary) }}</span></div>
+    <div class="payslip-line"><span>HRA</span><span class="v">₹{{ '%.2f'|format(payroll.hra) }}</span></div>
+    <div class="payslip-line"><span>DA</span><span class="v">₹{{ '%.2f'|format(payroll.da) }}</span></div>
+    <div class="payslip-line"><span>Medical allowance</span><span class="v">₹{{ '%.2f'|format(payroll.medical_allowance) }}</span></div>
+    <div class="payslip-line"><span>Other allowance</span><span class="v">₹{{ '%.2f'|format(payroll.other_allowance) }}</span></div>
+    <div class="payslip-line total"><span>Gross salary</span><span class="v">₹{{ '%.2f'|format(payroll.gross_salary) }}</span></div>
+
+    <div class="divider"></div>
+
+    <div class="payslip-line"><span>Provident fund</span><span class="v">−₹{{ '%.2f'|format(payroll.provident_fund) }}</span></div>
+    <div class="payslip-line"><span>Professional tax</span><span class="v">−₹{{ '%.2f'|format(payroll.professional_tax) }}</span></div>
+    <div class="payslip-line"><span>Other deduction</span><span class="v">−₹{{ '%.2f'|format(payroll.other_deduction) }}</span></div>
+    <div class="payslip-line total"><span>Net salary</span><span class="v">₹{{ '%.2f'|format(payroll.net_salary) }}</span></div>
+
+    <span class="hint" style="display:block; margin-top:12px;">Totals recalculate automatically when you save.</span>
+  </div>
+</div>
+
+{% endblock %}
